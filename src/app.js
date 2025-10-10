@@ -2,6 +2,23 @@ const express=require('express');
 const app=express();
 
 
+app.get('/user',
+  (req, res, next) => {
+    console.log("Step 1: Checking login...");
+    next(); // pass to next handler
+  },
+  (req, res, next) => {
+    console.log("Step 2: Fetching data...");
+    next(); // again move to next
+  },
+  (req, res,next) => {
+    console.log("Step 3: Sending response...");
+    next();
+    res.send("User data sent!");
+  }
+);
+
+
 app.get('/hello',(req,res)=>{
     res.send("Hello user");
 })
@@ -36,9 +53,7 @@ app.patch('/hello',(req,res)=>{
 app.delete('/hello',(req,res)=>{
     res.send("Successfully Deleted!");
 })
-app.use('/',(req,res)=>{
-    res.send("Namaste user");
-})
+
 
 app.listen(7777,()=>{
     console.log('server connected successfully');
