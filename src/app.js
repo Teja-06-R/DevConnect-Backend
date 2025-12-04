@@ -2,19 +2,34 @@ const express=require('express');
 const { connectDB } = require('./config/database');
 const app=express();
 const {Users}=require("./models/user");
+const {signupValidation}=require("./utils/validations");
+const bcrypt=require('bcrypt');
+const validator=require("validator");
+const cookieParser=require("cookie-parser");
+const jwt=require("jsonwebtoken");
+const {userAuth}=require("./middlewares/admin");
 
-app.use(express.json());
+app.use(express.json()); // it is applied for all the routes .
+app.use(cookieParser()); // it is used for reading cookies!
 
 app.post("/signup",async (req,res)=>{
-  console.log(req.body);
+  //Validate the Data
+  try{
+    const {name,emailId,password}=req.body;
+    signupValidation(req);
+  //Encrypt the Data
+   const hashedPassword=await bcrypt.hash(password,10);
   // creating new instance of the User model
-  const newUser=new Users(req.body);
-   try{
-      await newUser.save();
+  const newUser=new Users({name,
+    emailId,
+    password:hashedPassword,
+  });
+   
+      await newUser.save(); // helping to store the data in database
    res.send("Data Sent Successfully");
    }
    catch(err){
-    res.status(400).send("Data Not sent!"+ err.message);
+    res.status(400).send("ERROR!"+ err.message);
    }
    /*const newUser=new Users({
     name:"Tharun",
@@ -24,6 +39,38 @@ app.post("/signup",async (req,res)=>{
    */
 });
 
+app.post("/login",async (req,res)=>{
+  
+  try{
+    const {emailId,password}=req.body;
+    if(!validator.isEmail(emailId)){
+      throw new Error("EmailId is not Valid!");
+    }
+    const user=await Users.findOne({emailId:emailId});
+    if(!user){
+      throw new Error("Invalid credentials!");
+    }
+    const isPasswordValid=await bcrypt.compare(password,user.password);
+    if(isPasswordValid){
+       // here we will create a jwt
+      const token=jwt.sign({_id:user._id},
+        "Dev@Connect",
+         {expiresIn:"7d"}); 
+      //store it into a cookie
+      res.cookie("token",
+        token,
+        {maxAge:7*24*60*60*1000});
+      res.send("Login Successful!");
+    }
+    else{
+      throw new Error("Invalid credentials!");
+    }
+
+  }
+  catch(err){
+     res.status(400).send(""+err.message);
+  }
+})
 app.get("/user",async(req,res)=>{
   const userEmail=req.body.emailId;
   
@@ -41,48 +88,30 @@ app.get("/user",async(req,res)=>{
   }
 })
 
-//Feed api
-app.get("/feed",async(req,res)=>{  
+app.get("/profile",userAuth,async(req,res)=>{
   try{
-    const userDetails=await Users.find({});
-      res.send(userDetails);
+
+    /*const cookies=req.cookies;
+    const {token}=cookies;
+    if(!token){
+      throw new Error("Please Login First!");
+    }
+
+    const decodedMessage=jwt.verify(token,"Dev@Connect");  // it will give us a decoded message from jwt cookies.
+    const {_id}=decodedMessage;
+   
+    console.log(_id);
+    console.log(cookies);
+    const user=await Users.findById({_id:_id});*/
+    res.send(req.user);
   }
   catch(err){
-    res.status(400).send("Something went wrong"+ err.message);
+      res.send(err.message);
   }
 })
 
-app.delete("/user",async(req,res)=>{
-  const userId=req.body.userId;
-  try{
-    await Users.findByIdAndDelete(userId);
-    res.send("Data Deleted Successfully");
-  }
-  catch(err){
-    res.status(400).send("Failed to Delete Data. Try Again!!!");
-  }
-})
-
-app.patch("/user/:_id",async(req,res)=>{
-  const userMail=req.body.emailId;
-  const id=req.params?._id;
-  const data=req.body;
-
-  try{
-    const Allowed_Updates=['photoUrl','about','gender','skills','password'];
-    const isUpdateAllowed=Object.keys(data).every((k)=>Allowed_Updates.includes(k));
-    if(!isUpdateAllowed){
-      throw new Error("Update Not allowed");
-    }
-    if(data.skills.length > 10){
-      throw new Error("Skills Cannot be more than 10");
-    }
-    const updatedData=await Users.findByIdAndUpdate({_id:id},data,{runValidators:true});
-    res.send("Updated successfully"+updatedData);
-  }
-  catch(err){
-    res.status(400).send("DB not Updated. "+ err.message);
-  }
+app.post("/sendconnection",userAuth,async(req,res)=>{
+  res.send("Connection Request sent Succussfully to "+ req.body.name);
 })
 connectDB()
 .then(()=>{
