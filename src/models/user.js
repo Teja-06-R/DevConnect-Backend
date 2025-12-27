@@ -66,7 +66,7 @@ UsersSchema.methods.passwordValidation=async function(passwordfromUser){
   return isVaild;
 }
 
-const Users=mongoose.model("User",UsersSchema);
+const Users = mongoose.models.User || mongoose.model("User", UsersSchema);
 
 
 

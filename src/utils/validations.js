@@ -12,6 +12,17 @@ signupValidation=(req)=>{
         throw new Error("Set Strong Password!");
     }
 }
+validateEditFields=(req)=>{
+   const Allowed_updates=["name","photoUrl","skills"];
+
+   return Object.keys(req.body).every((key)=>Allowed_updates.includes(key));
+
+}
+passwordValidation=(password)=>{
+    return (validator.isStrongPassword(password));
+}
 module.exports={
     signupValidation,
+    validateEditFields,
+    passwordValidation
 }

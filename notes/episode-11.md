@@ -95,4 +95,74 @@ app.use('/',userRouter);
 - **Reusability**: Common middleware and logic can be reused across routes.
 
 ---
+## Overview
+Today's learning focuses on building key APIs for the DevTinder app:  
+1. A **Logout API** to securely log users out.  
+2. A **Profile/Edit API** to update user information while maintaining validation and security.
+
+---
+
+## 1. Logout API
+
+### Key Features:
+- **Purpose**: Log users out by clearing their authentication cookies.
+- **Implementation**:
+  - Use the `res.cookie` method to set the cookie storing the JWT token to `null`.
+  - Ensure the cookie is securely cleared by setting appropriate attributes (e.g., `httpOnly`, `secure`).
+
+```javascript
+  authRouter.post("/logout", async (req, res) => {
+    res
+        .cookie("token", null, {
+            expires: new Date(Date.now())
+        })
+        .send("User Logged out successfully")
+})
+```
+
+### Benefits:
+- Ensures a secure and seamless logout process.
+- Prevents unauthorized access by invalidating the session.
+
+---
+
+## 2. Profile/Edit API
+
+### Key Features:
+- **Purpose**: Allow users to update their profile information.
+- **Validation**:
+  - Implement checks to ensure only specific fields (e.g., `firstName`, `about`, `profileURL` etc) can be updated.
+  - Prevent updates to sensitive or immutable fields like `password` or `_id`.
+- **Security**:
+  - Validate all incoming data to ensure it meets predefined criteria (e.g., length, format).
+  - Sanitize inputs to prevent injection attacks or unintended updates.
+
+```javascript
+  profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+    try {
+        if (!validateEditFields(req)) {
+            throw new Error("Invalid Edit request")
+        }
+        const loggedInUser = req.user;
+        Object.keys(req.body).forEach(key => (loggedInUser[key] = req.body[key]))
+        await loggedInUser.save();
+        res.json({
+            message: ` ${loggedInUser.firstName}, your profile updated successfully`,
+            data: loggedInUser
+        })
+    }
+    catch (err) {
+        res.status(400).send("ERROR : " + err.message);
+    }
+})
+```
+
+### Benefits:
+- Maintains data integrity by restricting updates to allowable fields.
+- Provides a secure mechanism for users to manage their profile information.
+
+---
+
+## Conclusion
+This structured approach to API development ensures that the DevTinder backend is organized, maintainable, and scalable. Using Express Router and clearly defined endpoints simplifies future feature additions and debugging.
 

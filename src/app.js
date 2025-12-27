@@ -15,12 +15,15 @@ app.use(cookieParser()); // it is used for reading cookies!
 
 const authRouter=require("./routers/auth");
 const profileRouter=require("./routers/profile");
-const userRouter=require("./routers/request");
+const requestRouter=require("./routers/request");
+const userRouter = require('./routers/userRouter');
+ 
 
 
 app.use('/',authRouter);
 app.use('/',profileRouter);
-app.use('/',userRouter);
+app.use('/',requestRouter);
+app.use("/",userRouter);
 
 
 connectDB()
