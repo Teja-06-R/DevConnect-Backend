@@ -23,7 +23,7 @@ profileRouter.get("/profile/view",userAuth,async(req,res)=>{
     res.send(req.user);
   }
   catch(err){
-      res.send(err.message);
+      res.status(401).send(err.message);
   }
 })
 profileRouter.patch("/profile/edit",userAuth,async(req,res)=>{

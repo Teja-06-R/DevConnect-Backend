@@ -1,41 +1,49 @@
-const express=require('express');
-const { connectDB } = require('./config/database');
-const app=express();
-const {Users}=require("./models/user");
-const {signupValidation}=require("./utils/validations");
-const bcrypt=require('bcrypt');
-const validator=require("validator");
-const cookieParser=require("cookie-parser");
-const jwt=require("jsonwebtoken");
-const {userAuth}=require("./middlewares/admin");
+const express = require("express");
+const { connectDB } = require("./config/database");
+const app = express();
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 
 app.use(express.json()); // it is applied for all the routes .
 app.use(cookieParser()); // it is used for reading cookies!
 
+const authRouter = require("./routers/auth");
+const profileRouter = require("./routers/profile");
+const requestRouter = require("./routers/request");
+const userRouter = require("./routers/userRouter");
 
-const authRouter=require("./routers/auth");
-const profileRouter=require("./routers/profile");
-const requestRouter=require("./routers/request");
-const userRouter = require('./routers/userRouter');
- 
-
-
-app.use('/',authRouter);
-app.use('/',profileRouter);
-app.use('/',requestRouter);
-app.use("/",userRouter);
-
+app.use("/api", (req, res, next) => {
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, private"
+  );
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
+app.use("/", userRouter);
 
 connectDB()
-.then(()=>{
-   console.log("DB Connection Established Successfully");
-   app.listen(7777,()=>{
-    console.log('server connected successfully');
-});
-})
-.catch((err)=>{
+  .then(() => {
+    console.log("DB Connection Established Successfully");
+    app.listen(7777, () => {
+      console.log("server connected successfully");
+    });
+  })
+  .catch((err) => {
     console.error("Database cannot be connectted");
-})
+  });
 
 /*
 app.use('/admin',(req,res,next)=>{

@@ -13,7 +13,7 @@ signupValidation=(req)=>{
     }
 }
 validateEditFields=(req)=>{
-   const Allowed_updates=["name","photoUrl","skills"];
+   const Allowed_updates=["name","photoUrl","skills","age","gender","about",];
 
    return Object.keys(req.body).every((key)=>Allowed_updates.includes(key));
 
