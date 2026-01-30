@@ -6,16 +6,15 @@ const { Users } = require("../models/user");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
 
-
 authRouter.post("/signup", async (req, res) => {
   try {
     const { name, emailId, password } = req.body;
-    
+
     // Validation
     if (!name || !emailId || !password) {
       return res.status(400).send("All fields are required");
     }
-    
+
     if (password.length < 6) {
       return res.status(400).send("Password must be at least 6 characters");
     }
@@ -28,34 +27,35 @@ authRouter.post("/signup", async (req, res) => {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     // Create user
     const newUser = new Users({
       name,
       emailId,
       password: hashedPassword,
     });
-    
+
     await newUser.save();
-    
+
     // Create JWT token (same as login)
     const token = jwt.sign({ _id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d"
+      expiresIn: "7d",
     });
-    
+
     // Set cookie (same as login)
     res.cookie("token", token, {
       expires: new Date(Date.now() + 7 * 24 * 3600000),
-      httpOnly: true
+      httpOnly: true,
+      secure: true, // ✅ REQUIRED for HTTPS
+      sameSite: "none",
     });
-    
+
     // ✅ IMPORTANT: Return user object directly (not wrapped in data)
     // Remove password from response
     const userObject = newUser.toObject();
     delete userObject.password;
-    
-    res.json(userObject);  // Same format as login!
-    
+
+    res.json(userObject); // Same format as login!
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
   }
@@ -75,7 +75,12 @@ authRouter.post("/login", async (req, res) => {
       // here we will create a jwt
       const token = await user.getJWT();
       //store it into a cookie
-      res.cookie("token", token, { maxAge: 7 * 24 * 60 * 60 * 1000 });
+      res.cookie("token", token, {
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: true, // ✅ REQUIRED for HTTPS
+        sameSite: "none",
+      });
       res.send(user);
     } else {
       throw new Error("Invalid credentials!");
@@ -85,7 +90,10 @@ authRouter.post("/login", async (req, res) => {
   }
 });
 authRouter.post("/logout", async (req, res) => {
-  res.cookie("token", null, { expires: new Date(Date.now()) });
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+    
+  });
   res.send("your profile is logged out Successfully!");
 });
 

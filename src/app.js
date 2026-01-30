@@ -6,10 +6,14 @@ const cors = require("cors");
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://dev-connect-xxxx.vercel.app" // 👈 YOUR VERCEL URL
+    ],
     credentials: true,
   })
 );
+
 
 require('dotenv').config()
 app.use(express.json()); // it is applied for all the routes .
