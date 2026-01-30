@@ -39,7 +39,7 @@ authRouter.post("/signup", async (req, res) => {
     await newUser.save();
     
     // Create JWT token (same as login)
-    const token = jwt.sign({ _id: newUser._id }, "Dev@Connect", {
+    const token = jwt.sign({ _id: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "7d"
     });
     

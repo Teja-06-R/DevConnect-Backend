@@ -11,7 +11,7 @@ app.use(
   })
 );
 
-
+require('dotenv').config()
 app.use(express.json()); // it is applied for all the routes .
 app.use(cookieParser()); // it is used for reading cookies!
 
@@ -37,7 +37,7 @@ app.use("/", userRouter);
 connectDB()
   .then(() => {
     console.log("DB Connection Established Successfully");
-    app.listen(7777, () => {
+    app.listen(process.env.PORT, () => {
       console.log("server connected successfully");
     });
   })

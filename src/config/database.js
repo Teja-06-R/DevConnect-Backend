@@ -1,7 +1,7 @@
 const mongoose=require('mongoose');
 
 connectDB=async()=>{
-   await mongoose.connect('mongodb+srv://reddihimateja:Namastenode25@namastecluster.ylyvuh0.mongodb.net/devtinder');
+   await mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
    console.log("Connected to DB:", mongoose.connection.name);
 };
 

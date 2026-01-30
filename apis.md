@@ -83,7 +83,7 @@ app.get("/profile",userAuth,async(req,res)=>{
       throw new Error("Please Login First!");
     }
 
-    const decodedMessage=jwt.verify(token,"Dev@Connect");  // it will give us a decoded message from jwt cookies.
+    const decodedMessage=jwt.verify(token,process.env.JWT_SECRET);  // it will give us a decoded message from jwt cookies.
     const {_id}=decodedMessage;
    
     console.log(_id);

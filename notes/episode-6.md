@@ -38,7 +38,7 @@ If DB is not connected → server should NOT start.
 const { connectDB } = require("./config/database");
 
 connectDB().then(() => {
-app.listen(7777, () => console.log("Server started"));
+app.listen(procees.env.PORT, () => console.log("Server started"));
 });
 
 - Using that connectDB checking whether its connected or not if connected print DB connected successfully.
