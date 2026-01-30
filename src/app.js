@@ -4,11 +4,13 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
+app.set("trust proxy", 1); // 🔥 REQUIRED
+
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://dev-connect-xxxx.vercel.app" // 👈 YOUR VERCEL URL
+      "https://dev-connect-ten-nu.vercel.app" // 👈 YOUR VERCEL URL
     ],
     credentials: true,
   })
@@ -24,15 +26,7 @@ const profileRouter = require("./routers/profile");
 const requestRouter = require("./routers/request");
 const userRouter = require("./routers/userRouter");
 
-app.use("/api", (req, res, next) => {
-  res.setHeader(
-    "Cache-Control",
-    "no-store, no-cache, must-revalidate, private"
-  );
-  res.setHeader("Pragma", "no-cache");
-  res.setHeader("Expires", "0");
-  next();
-});
+
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
