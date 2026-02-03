@@ -5,6 +5,8 @@ const bcrypt = require("bcrypt");
 const { Users } = require("../models/user");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
+const sendEmail = require("../utils/sendEmail");
+
 
 authRouter.post("/signup", async (req, res) => {
   try {
@@ -56,9 +58,22 @@ authRouter.post("/signup", async (req, res) => {
     delete userObject.password;
 
     res.json(userObject); // Same format as login!
+    await sendEmail({
+      to:emailId,
+      subject:"Welcome to DevConnect🚀",
+      html:`
+    <h2>Hi ${name} 👋</h2>
+    <p>Welcome to <b>DevConnect</b>.</p>
+    <p>Start connecting with developers today!</p>
+    <br/>
+    <p>– Team DevConnect</p>
+  `,
+
+    })
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
   }
+  
 });
 authRouter.post("/login", async (req, res) => {
   try {
@@ -93,8 +108,8 @@ authRouter.post("/logout", async (req, res) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
     httpOnly: true,
-  secure: true,
-  sameSite: "none",
+    secure: true,
+    sameSite: "none",
   });
   res.send("your profile is logged out Successfully!");
 });
