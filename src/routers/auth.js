@@ -58,7 +58,7 @@ authRouter.post("/signup", async (req, res) => {
     delete userObject.password;
 
     res.json(userObject); // Same format as login!
-    await sendEmail({
+     sendEmail({
       to:emailId,
       subject:"Welcome to DevConnect🚀",
       html:`
