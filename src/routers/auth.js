@@ -57,19 +57,24 @@ authRouter.post("/signup", async (req, res) => {
     const userObject = newUser.toObject();
     delete userObject.password;
 
-    res.json(userObject); // Same format as login!
-     sendEmail({
-      to:emailId,
-      subject:"Welcome to DevConnect🚀",
-      html:`
-    <h2>Hi ${name} 👋</h2>
-    <p>Welcome to <b>DevConnect</b>.</p>
-    <p>Start connecting with developers today!</p>
-    <br/>
-    <p>– Team DevConnect</p>
-  `,
+    // Send email BEFORE response (non-blocking but tracked)
+    // Using .catch() to prevent unhandled rejection while not blocking signup
+    sendEmail({
+      to: emailId,
+      subject: "Welcome to DevConnect🚀",
+      html: `
+        <h2>Hi ${name} 👋</h2>
+        <p>Welcome to <b>DevConnect</b>.</p>
+        <p>Start connecting with developers today!</p>
+        <br/>
+        <p>– Team DevConnect</p>
+      `,
+    }).catch((err) => {
+      // Log but don't fail signup — email is non-critical
+      console.error("Welcome email failed:", err.message);
+    });
 
-    })
+    res.json(userObject);
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
   }
