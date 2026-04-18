@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require("express");
 const { connectDB } = require("./config/database");
 const app = express();
@@ -6,18 +7,20 @@ const cors = require("cors");
 
 app.set("trust proxy", 1); // 🔥 REQUIRED
 
+
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://dev-connect-ten-nu.vercel.app" // 👈 YOUR VERCEL URL
+      "https://himateja.indevs.in" 
     ],
     credentials: true,
   })
 );
 
 
-require('dotenv').config()
+
+require('./utils/cronjob');
 app.use(express.json()); // it is applied for all the routes .
 app.use(cookieParser()); // it is used for reading cookies!
 
@@ -40,7 +43,7 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.error("Database cannot be connectted");
+    console.error("Database cannot be connected");
   });
 
 /*
