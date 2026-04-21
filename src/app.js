@@ -1,10 +1,12 @@
 require('dotenv').config()
+const http=require('http');
 const express = require("express");
 const { connectDB } = require("./config/database");
 const app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
+const initializeSocket = require('./utils/initializeSocket');
 app.set("trust proxy", 1); // 🔥 REQUIRED
 
 
@@ -35,10 +37,13 @@ app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 
+const server=http.createServer(app);
+initializeSocket(server);
+
 connectDB()
   .then(() => {
     console.log("DB Connection Established Successfully");
-    app.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
       console.log("server connected successfully");
     });
   })

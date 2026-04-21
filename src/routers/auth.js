@@ -7,6 +7,7 @@ const validator = require("validator");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
 
+const isProduction = process.env.NODE_ENV === "production";
 
 authRouter.post("/signup", async (req, res) => {
   try {
@@ -48,8 +49,8 @@ authRouter.post("/signup", async (req, res) => {
     res.cookie("token", token, {
       expires: new Date(Date.now() + 7 * 24 * 3600000),
       httpOnly: true,
-      secure: true, // ✅ REQUIRED for HTTPS
-      sameSite: "none",
+      secure: isProduction, // ✅ REQUIRED for HTTPS
+      sameSite: isProduction ? "none" : "lax",
     });
 
     // ✅ IMPORTANT: Return user object directly (not wrapped in data)
@@ -78,7 +79,6 @@ authRouter.post("/signup", async (req, res) => {
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
   }
-  
 });
 authRouter.post("/login", async (req, res) => {
   try {
@@ -98,8 +98,8 @@ authRouter.post("/login", async (req, res) => {
       res.cookie("token", token, {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: true, // ✅ REQUIRED for HTTPS
-        sameSite: "none",
+        secure: isProduction, // ✅ REQUIRED for HTTPS
+        sameSite: isProduction ? "none" : "lax",
       });
       res.send(user);
     } else {
